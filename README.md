@@ -21,45 +21,41 @@ To write a PYTHON program for socket for HTTP for web page upload and download
 ```
 import socket
 
-def send_request(host, port, request):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((host, port))
-        s.sendall(request.encode())
-        response = s.recv(4096).decode()
+def handle_request(request):
+    # Process the HTTP request and generate an appropriate response
+    response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<h1>Hello, World!</h1>"
     return response
 
-def upload_file(host, port, filename):
-    with open(filename, 'rb') as file:
-        file_data = file.read()
-        content_length = len(file_data)
-        request = f"POST /upload HTTP/1.1\r\nHost: {host}\r\nContent-Length: {content_length}\r\n\r\n"
-        request += file_data.decode()
-        response = send_request(host, port, request)
-    return response
+def main():
+    host = ''  # Listen on all available interfaces
+    port = 8080  # Port number for HTTP server
 
-def download_file(host, port, filename):
-    request = f"GET /{filename} HTTP/1.1\r\nHost: {host}\r\n\r\n"
-    response = send_request(host, port, request)
-    # Assuming the response contains the file content after the headers
-    file_content = response.split('\r\n\r\n', 1)[1]
-    with open(filename, 'wb') as file:
-        file.write(file_content.encode())
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind((host, port))
+    server_socket.listen(5)  # Listen for incoming connections
+
+    print("HTTP server listening on port", port)
+
+    while True:
+        client_socket, client_address = server_socket.accept()  # Accept a new connection
+        print("Client connected:", client_address)
+
+        request_data = client_socket.recv(1024).decode()  # Receive request data from the client
+        print("Received request:\n", request_data)
+
+        response = handle_request(request_data)  # Handle the request
+        client_socket.sendall(response.encode())  # Send the response back to the client
+
+        client_socket.close()  # Close the connection
 
 if __name__ == "__main__":
-    host = 'example.com'
-    port = 80
-
-    # Upload file
-    upload_response = upload_file(host, port, 'example.txt')
-    print("Upload response:", upload_response)
-
-    # Download file
-    download_file(host, port, 'example.txt')
-    print("File downloaded successfully.")
+    main()
 
 ```
 ## OUTPUT
-![image](https://github.com/23004513/5a_Create_Socket_for_HTTP_for_webpage_upload_and_download/assets/138973069/2ba4a43f-96c1-411a-ac56-0ba75d937789)
+![Screenshot 2024-04-29 143826](https://github.com/Sachin-0305/5a_Create_Socket_for_HTTP_for_webpage_upload_and_download/assets/149985717/a3bf28a7-5d11-41fa-bd33-8a13d368eeb1)
+![Screenshot 2024-04-29 143811](https://github.com/Sachin-0305/5a_Create_Socket_for_HTTP_for_webpage_upload_and_download/assets/149985717/243fbe20-4213-44e9-a779-13693f659f11)
+
 
 ## Result
 Thus the socket for HTTP for web page upload and download created and Executed
